@@ -3,15 +3,13 @@ import api from './api';
 /**
  * Register a new user.
  */
-export async function register({ name, email, password, role, college }) {
+export async function register({ name, email, password }) {
   const { data } = await api.post('/auth/register', {
     name,
     email,
     password,
-    role,
-    college,
   });
-  return data; // { user, accessToken }
+  return data;
 }
 
 /**
@@ -20,7 +18,7 @@ export async function register({ name, email, password, role, college }) {
  */
 export async function login({ email, password }) {
   const { data } = await api.post('/auth/login', { email, password });
-  return data; // { user, accessToken }
+  return data;
 }
 
 /**
@@ -28,7 +26,7 @@ export async function login({ email, password }) {
  */
 export async function refreshAccessToken() {
   const { data } = await api.post('/auth/refresh');
-  return data; // { accessToken }
+  return data;
 }
 
 /**
@@ -45,7 +43,7 @@ export async function getMe(accessToken) {
   const { data } = await api.get('/auth/me', {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  return data.user;
+  return data;
 }
 
 export default {

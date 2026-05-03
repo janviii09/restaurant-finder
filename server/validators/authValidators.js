@@ -14,17 +14,7 @@ const registerRules = [
 
   body('password')
     .notEmpty().withMessage('Password is required')
-    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
-    .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
-    .matches(/[0-9]/).withMessage('Password must contain at least one number'),
-
-  body('role')
-    .optional()
-    .isIn(['student', 'owner']).withMessage('Role must be "student" or "owner"'),
-
-  body('college')
-    .optional()
-    .isIn(['JIIT-62', 'JIIT-128', 'Other']).withMessage('Invalid college value'),
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
 ];
 
 const loginRules = [

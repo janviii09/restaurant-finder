@@ -1,6 +1,5 @@
 import { useFilters } from '../../context/FilterContext';
-
-const radiusSteps = [500, 1000, 1500, 2000, 2500, 3000, 4000, 5000];
+import { MIN_RADIUS, MAX_RADIUS } from '../../utils/constants';
 
 export default function RadiusSlider() {
   const { filters, dispatch } = useFilters();
@@ -31,9 +30,9 @@ export default function RadiusSlider() {
       <input
         id="radius-slider"
         type="range"
-        min={500}
-        max={5000}
-        step={100}
+        min={MIN_RADIUS}
+        max={MAX_RADIUS}
+        step={500}
         value={filters.radius}
         onChange={handleChange}
         className="w-full h-1.5 bg-surface-200 dark:bg-surface-700 rounded-full
@@ -50,9 +49,9 @@ export default function RadiusSlider() {
       />
 
       <div className="flex justify-between text-[10px] text-surface-400 mt-1">
-        <span>500m</span>
-        <span>2.5km</span>
-        <span>5km</span>
+        <span>{(MIN_RADIUS / 1000).toFixed(0)}km</span>
+        <span>{((MIN_RADIUS + MAX_RADIUS) / 2 / 1000).toFixed(1)}km</span>
+        <span>{(MAX_RADIUS / 1000).toFixed(0)}km</span>
       </div>
     </div>
   );

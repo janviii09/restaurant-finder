@@ -1,12 +1,26 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { LocationProvider } from './context/LocationContext';
 import { FilterProvider } from './context/FilterContext';
 import Navbar from './components/layout/Navbar';
 import Home from './pages/Home';
+import Search from './pages/Search';
+import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 function AppContent() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col">
@@ -15,14 +29,10 @@ function AppContent() {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* Phase 3+ routes will be added here */}
-            {/* <Route path="/search" element={<Search />} /> */}
-            {/* <Route path="/restaurant/:slug" element={<RestaurantDetail />} /> */}
-            {/* <Route path="/login" element={<Login />} /> */}
-            {/* <Route path="/register" element={<Register />} /> */}
-            {/* <Route path="/profile" element={<Profile />} /> */}
-            {/* <Route path="/add-restaurant" element={<AddRestaurant />} /> */}
-            {/* <Route path="/admin" element={<AdminDashboard />} /> */}
+            <Route path="/search" element={<Search />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
             {/* 404 catch-all */}
             <Route
@@ -52,7 +62,7 @@ function AppContent() {
               🍽️ <span className="font-semibold">Restaurant Finder</span> — Made for JIIT Noida students
             </p>
             <p className="mt-1 text-xs">
-              Sectors 62, 128 &amp; nearby · Open-source · Built with ❤️
+              Sectors 62, 128 &amp; nearby · Powered by OpenStreetMap · Built with ❤️
             </p>
           </div>
         </footer>

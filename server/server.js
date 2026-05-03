@@ -31,8 +31,8 @@ app.use(
 );
 
 // ─── Body parsers ─────────────────────────────────────────────────
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(cookieParser());
 
 // ─── Logging ──────────────────────────────────────────────────────
@@ -72,10 +72,8 @@ app.get('/api/health', (req, res) => {
 // API routes
 app.use('/api/auth',        authLimiter, require('./routes/auth'));
 app.use('/api/restaurants',  require('./routes/restaurants'));
-// app.use('/api/reviews',      require('./routes/reviews'));
-// app.use('/api/users',        require('./routes/users'));
-// app.use('/api/admin',        require('./routes/admin'));
-app.use('/api/geocode',      require('./routes/geocode'));
+app.use('/api/bookmarks',    require('./routes/bookmarks'));
+app.use('/api/users',        require('./routes/users'));
 
 // ─── 404 handler ──────────────────────────────────────────────────
 app.use((req, res) => {
@@ -95,15 +93,6 @@ const startServer = async () => {
   // Connect to MongoDB
   await connectDB();
 
-  // Connect to Redis (if configured)
-  if (redis) {
-    try {
-      await redis.connect();
-    } catch (err) {
-      console.warn('⚠️  Redis connect failed (continuing without cache):', err.message);
-    }
-  }
-
   const server = app.listen(PORT, () => {
     console.log(`\n🚀 Server running in ${NODE_ENV} mode on port ${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/api/health\n`);
@@ -118,11 +107,6 @@ const startServer = async () => {
         const mongoose = require('mongoose');
         await mongoose.connection.close();
         console.log('   ✅ MongoDB connection closed');
-
-        if (redis) {
-          await redis.quit();
-          console.log('   ✅ Redis connection closed');
-        }
       } catch (err) {
         console.error('   ❌ Error during shutdown:', err);
       }

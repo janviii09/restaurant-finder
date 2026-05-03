@@ -1,6 +1,19 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const bookmarkSchema = new mongoose.Schema(
+  {
+    osmId: { type: String, required: true },
+    name: { type: String, required: true, trim: true },
+    amenity: { type: String, default: null },
+    cuisine: { type: String, default: null },
+    lat: { type: Number, required: true },
+    lon: { type: Number, required: true },
+    savedAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -19,17 +32,21 @@ const userSchema = new mongoose.Schema(
       match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
     },
 
-    password: {
+    passwordHash: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [8, 'Password must be at least 8 characters'],
+      required: [true, 'Password hash is required'],
       select: false, // Never returned in queries by default
+    },
+
+    bookmarks: {
+      type: [bookmarkSchema],
+      default: [],
     },
 
     role: {
       type: String,
       enum: {
-        values: ['student', 'owner', 'admin'],
+        values: ['student', 'admin'],
         message: '{VALUE} is not a valid role',
       },
       default: 'student',
@@ -44,12 +61,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['JIIT-62', 'JIIT-128', 'Other'],
       default: 'Other',
-    },
-
-    // Web Push notification subscription object
-    pushSubscription: {
-      type: Object,
-      default: null,
     },
 
     isActive: {
@@ -67,23 +78,15 @@ const userSchema = new mongoose.Schema(
 // ─── Indexes ─────────────────────────────────────────────────────
 userSchema.index({ email: 1 });
 
-// ─── Pre-save: hash password ─────────────────────────────────────
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  const salt = await bcrypt.genSalt(12);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
 // ─── Instance methods ────────────────────────────────────────────
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+  return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
-// Strip password from JSON output (safety net for select: false)
+// Strip password hash from JSON output.
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
-  delete obj.password;
+  delete obj.passwordHash;
   return obj;
 };
 

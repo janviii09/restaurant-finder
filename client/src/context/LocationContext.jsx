@@ -1,64 +1,61 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const LocationContext = createContext(null);
 
-export function LocationProvider({ children }) {
-  const [userLocation, setUserLocation] = useState(null);
-  const [locationError, setLocationError] = useState(null);
-  const [isLocating, setIsLocating] = useState(false);
+export const CAMPUSES = {
+  'Sector 62': { lat: 28.6304, lng: 77.371 },
+  'Sector 128': { lat: 28.5355, lng: 77.391 },
+};
 
-  const requestLocation = useCallback(() => {
+export function LocationProvider({ children }) {
+  const [coords, setCoords] = useState(null);
+  const [state, setState] = useState('requesting');
+
+  function getLocation() {
     if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by your browser');
+      setState('fallback');
       return;
     }
 
-    setIsLocating(true);
-    setLocationError(null);
-
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        });
-        setIsLocating(false);
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setState('granted');
       },
-      (error) => {
-        let message;
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            message = 'Location permission denied. Please enable it in your browser settings.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            message = 'Location information is unavailable.';
-            break;
-          case error.TIMEOUT:
-            message = 'Location request timed out. Please try again.';
-            break;
-          default:
-            message = 'An unknown error occurred while fetching location.';
+      (err) => {
+        console.warn('Geolocation error:', err.message);
+        if (err.code === 1) {
+          setState('denied');
+        } else {
+          setState('fallback');
         }
-        setLocationError(message);
-        setIsLocating(false);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000, // Cache for 1 minute
-      }
+      { timeout: 10000, maximumAge: 60000, enableHighAccuracy: false }
     );
+  }
+
+  useEffect(() => {
+    setState('requesting');
+    getLocation();
   }, []);
 
-  // Auto-request location on mount
-  useEffect(() => {
-    requestLocation();
-  }, [requestLocation]);
+  const chooseCampus = (campusName) => {
+    const campus = CAMPUSES[campusName];
+    if (!campus) return;
+    setCoords(campus);
+    setState('fallback');
+  };
 
   return (
     <LocationContext.Provider
-      value={{ userLocation, locationError, isLocating, requestLocation }}
+      value={{
+        coords,
+        state,
+        setCoords,
+        setState,
+        getLocation,
+        chooseCampus,
+      }}
     >
       {children}
     </LocationContext.Provider>

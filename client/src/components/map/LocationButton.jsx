@@ -1,15 +1,20 @@
 import { useLocation } from '../../context/LocationContext';
 
 export default function LocationButton() {
-  const { userLocation, locationError, isLocating, requestLocation } = useLocation();
+  const { coords, state, getLocation, setState } = useLocation();
+
+  const isLocating = state === 'requesting';
 
   return (
     <button
       id="btn-locate-me"
-      onClick={requestLocation}
+      onClick={() => {
+        setState('requesting');
+        getLocation();
+      }}
       disabled={isLocating}
       className="btn-primary gap-2 text-sm"
-      title={locationError || 'Locate me'}
+      title={state === 'denied' ? 'Location denied' : 'Locate me'}
     >
       {isLocating ? (
         <>
@@ -36,7 +41,7 @@ export default function LocationButton() {
               d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
             />
           </svg>
-          {userLocation ? 'Re-locate' : 'Find Me'}
+          {coords ? 'Re-locate' : 'Find Me'}
         </>
       )}
     </button>

@@ -1,7 +1,9 @@
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
+  const { token, logout } = useAuth();
 
   return (
     <nav className="sticky top-0 z-50 glass border-b border-surface-200/50 dark:border-surface-700/50">
@@ -24,7 +26,14 @@ export default function Navbar() {
           </a>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <a href="/search" className="btn-secondary text-sm">
+              Explore
+            </a>
+            <a href="/profile" className="btn-secondary text-sm">
+              Bookmarks
+            </a>
+
             {/* Theme toggle */}
             <button
               id="btn-theme-toggle"
@@ -45,14 +54,15 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Login button */}
-            <a
-              href="/login"
-              id="btn-login"
-              className="btn-secondary text-sm"
-            >
-              Sign In
-            </a>
+            {token ? (
+              <button onClick={logout} id="btn-logout" className="btn-secondary text-sm">
+                Logout
+              </button>
+            ) : (
+              <a href="/login" id="btn-login" className="btn-secondary text-sm">
+                Sign In
+              </a>
+            )}
           </div>
         </div>
       </div>

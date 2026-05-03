@@ -9,9 +9,9 @@ export const DEFAULT_CENTER = {
 
 // Map defaults
 export const DEFAULT_ZOOM = 14;
-export const MIN_RADIUS = 500;   // meters
-export const MAX_RADIUS = 5000;  // meters
-export const DEFAULT_RADIUS = 2000;
+export const MIN_RADIUS = 2000;   // meters
+export const MAX_RADIUS = 15000;  // meters
+export const DEFAULT_RADIUS = 3000;
 
 // Cuisine options for filter facets
 export const CUISINE_OPTIONS = [

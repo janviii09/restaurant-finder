@@ -1,77 +1,88 @@
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 const AuthContext = createContext(null);
 
-const initialState = {
-  user: null,
-  accessToken: null,
-  isAuthenticated: false,
-  isLoading: true,
-};
+const API_BASE_URL =
+  import.meta.env.REACT_APP_API_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:5000';
 
-function authReducer(state, action) {
-  switch (action.type) {
-    case 'LOGIN_SUCCESS':
-      return {
-        ...state,
-        user: action.payload.user,
-        accessToken: action.payload.accessToken,
-        isAuthenticated: true,
-        isLoading: false,
-      };
-    case 'LOGOUT':
-      return {
-        ...initialState,
-        isLoading: false,
-      };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'UPDATE_USER':
-      return { ...state, user: { ...state.user, ...action.payload } };
-    case 'SET_ACCESS_TOKEN':
-      return { ...state, accessToken: action.payload };
-    default:
-      return state;
+function decodePayload(token) {
+  try {
+    const payload = token.split('.')[1];
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const json = atob(normalized);
+    return JSON.parse(json);
+  } catch {
+    return null;
   }
 }
 
-export function AuthProvider({ children }) {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+function isExpired(token) {
+  const payload = decodePayload(token);
+  if (!payload?.exp) return true;
+  return payload.exp * 1000 <= Date.now();
+}
 
-  const login = (user, accessToken) => {
-    dispatch({ type: 'LOGIN_SUCCESS', payload: { user, accessToken } });
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('jiit_token');
+    const storedUser = localStorage.getItem('jiit_user');
+
+    if (storedToken && !isExpired(storedToken)) {
+      setToken(storedToken);
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          localStorage.removeItem('jiit_user');
+        }
+      }
+    } else {
+      localStorage.removeItem('jiit_token');
+      localStorage.removeItem('jiit_user');
+    }
+
+    setLoading(false);
+  }, []);
+
+  const login = async (email, password) => {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const body = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(body.error || 'Failed to login');
+    }
+
+    setToken(body.token);
+    setUser(body.user);
+    localStorage.setItem('jiit_token', body.token);
+    localStorage.setItem('jiit_user', JSON.stringify(body.user));
+    return body;
   };
 
   const logout = () => {
-    dispatch({ type: 'LOGOUT' });
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('jiit_token');
+    localStorage.removeItem('jiit_user');
   };
 
-  const setLoading = (loading) => {
-    dispatch({ type: 'SET_LOADING', payload: loading });
-  };
-
-  const updateUser = (updates) => {
-    dispatch({ type: 'UPDATE_USER', payload: updates });
-  };
-
-  const setAccessToken = (token) => {
-    dispatch({ type: 'SET_ACCESS_TOKEN', payload: token });
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        ...state,
-        login,
-        logout,
-        setLoading,
-        updateUser,
-        setAccessToken,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, token, login, logout, loading }),
+    [user, token, loading]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

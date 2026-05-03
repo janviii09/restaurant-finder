@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const { MONGO_URI } = require('./env');
+const { MONGODB_URI } = require('./env');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(MONGO_URI, {
+    const conn = await mongoose.connect(MONGODB_URI, {
       maxPoolSize: 10,
     });
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
