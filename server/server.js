@@ -5,6 +5,9 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
+const { authLimiter } = require('./middleware/rateLimiter');
+const errorHandler = require('./middleware/errorHandler');
+
 const connectDB = require('./config/db');
 const { redis } = require('./config/redis');
 const { PORT, NODE_ENV, CLIENT_URL } = require('./config/env');
@@ -66,13 +69,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API route placeholders (Phase 3–6 will populate these)
-// app.use('/api/auth',        require('./routes/auth'));
-// app.use('/api/restaurants',  require('./routes/restaurants'));
+// API routes
+app.use('/api/auth',        authLimiter, require('./routes/auth'));
+app.use('/api/restaurants',  require('./routes/restaurants'));
 // app.use('/api/reviews',      require('./routes/reviews'));
 // app.use('/api/users',        require('./routes/users'));
 // app.use('/api/admin',        require('./routes/admin'));
-// app.use('/api/geocode',      require('./routes/geocode'));
+app.use('/api/geocode',      require('./routes/geocode'));
 
 // ─── 404 handler ──────────────────────────────────────────────────
 app.use((req, res) => {
@@ -83,21 +86,7 @@ app.use((req, res) => {
 });
 
 // ─── Global error handler ─────────────────────────────────────────
-app.use((err, req, res, _next) => {
-  console.error('💥 Unhandled error:', err);
-
-  const statusCode = err.statusCode || 500;
-  const message =
-    NODE_ENV === 'production'
-      ? 'Internal server error'
-      : err.message || 'Internal server error';
-
-  res.status(statusCode).json({
-    status: statusCode,
-    error: message,
-    ...(NODE_ENV === 'development' && { stack: err.stack }),
-  });
-});
+app.use(errorHandler);
 
 // ═══════════════════════════════════════════════════════════════════
 //  START SERVER
