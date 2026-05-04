@@ -70,10 +70,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // API routes
-app.use('/api/auth',        authLimiter, require('./routes/auth'));
-app.use('/api/restaurants',  require('./routes/restaurants'));
-app.use('/api/bookmarks',    require('./routes/bookmarks'));
-app.use('/api/users',        require('./routes/users'));
+app.use('/api/auth', authLimiter, require('./routes/auth'));
+app.use('/api/restaurants', require('./routes/restaurants'));
+app.use('/api/bookmarks', require('./routes/bookmarks'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/reviews', require('./routes/reviews'));
 
 // ─── 404 handler ──────────────────────────────────────────────────
 app.use((req, res) => {

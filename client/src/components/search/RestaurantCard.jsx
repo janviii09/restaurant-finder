@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import OpeningHoursParser from 'opening_hours';
+import ReviewSection from '../reviews/ReviewSection';
 
 function titleCase(value) {
   return String(value)
@@ -59,6 +61,8 @@ export default function RestaurantCard({
   onRemove,
   showBookmarkButton = true,
 }) {
+  const [showReviews, setShowReviews] = useState(false);
+  
   const categories = Array.isArray(restaurant.allCategories) ? restaurant.allCategories : [];
   const openingState = parseOpeningState(restaurant.openingHours?.raw);
   const primaryAddress = restaurant.address?.full || null;
@@ -172,13 +176,25 @@ export default function RestaurantCard({
         )}
       </div>
 
-      {rating !== null && rating !== undefined && (
-        <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300">
-          <span className="text-amber-500">{renderStars(rating)}</span>
-          <span>{Number(rating).toFixed(1)}</span>
-          {reviewCount !== null && reviewCount !== undefined && <span>({reviewCount} reviews)</span>}
-        </div>
-      )}
+      <div className="flex items-center justify-between mt-2">
+        {rating !== null && rating !== undefined ? (
+          <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300">
+            <span className="text-amber-500">{renderStars(rating)}</span>
+            <span>{Number(rating).toFixed(1)}</span>
+            {reviewCount !== null && reviewCount !== undefined && <span>({reviewCount} reviews)</span>}
+          </div>
+        ) : (
+          <div></div>
+        )}
+        <button 
+          onClick={() => setShowReviews(!showReviews)}
+          className="text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline px-2 py-1 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition-colors"
+        >
+          {showReviews ? 'Hide Reviews' : 'Show Reviews'}
+        </button>
+      </div>
+
+      {showReviews && <ReviewSection restaurantId={restaurant.geoapifyId || restaurant._id || restaurant.id} />}
     </article>
   );
 }
