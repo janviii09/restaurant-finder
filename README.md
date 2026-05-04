@@ -9,6 +9,7 @@ A full-stack web application designed for students of Jaypee Institute of Inform
 - **Detailed Restaurant Info:** View full addresses, specific categories (e.g., Fast Food, Cafés, Restaurants), opening hours, and more.
 - **Secure Authentication:** JWT-based user registration and login system.
 - **Bookmarking System:** Save your favorite spots to your profile for quick access later.
+- **Reviews and Ratings:** Authenticated users can leave 1-5 star ratings and comments on restaurants. Automatically calculates and displays average ratings and total review counts per restaurant.
 - **Performance Optimized:** Uses Upstash Redis caching to minimize external API calls and ensure ultra-fast response times.
 
 ## Tech Stack
@@ -49,7 +50,7 @@ A full-stack web application designed for students of Jaypee Institute of Inform
    ```
    Create a `.env` file in the `server` directory and add the following:
    ```env
-   PORT=5000
+   PORT=5001
    NODE_ENV=development
    
    # MongoDB Atlas
@@ -83,7 +84,7 @@ A full-stack web application designed for students of Jaypee Institute of Inform
    ```
    Create a `.env` file in the `client` directory (if needed):
    ```env
-   VITE_API_URL=http://localhost:5000
+   VITE_API_URL=http://localhost:5001
    ```
    Start the frontend development server:
    ```bash

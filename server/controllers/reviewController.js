@@ -15,9 +15,9 @@ exports.getReviews = async (req, res, next) => {
       totalReviews,
       averageRating: Number(averageRating.toFixed(1))
     });
-  } catch (err) {
-    next(err);
-  }
+} catch (err) {
+  next(err);
+}
 };
 
 exports.addReview = async (req, res, next) => {
