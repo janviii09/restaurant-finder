@@ -8,6 +8,6 @@ router.use(auth);
 
 router.get('/', bookmarkController.getBookmarks);
 router.post('/', bookmarkController.addBookmark);
-router.delete('/:osmId', bookmarkController.removeBookmark);
+router.delete('/:geoapifyId', bookmarkController.removeBookmark);
 
 module.exports = router;

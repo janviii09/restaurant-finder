@@ -8,10 +8,8 @@ export async function getBookmarks(accessToken) {
 
 export async function addBookmark(restaurant, accessToken) {
   const { data } = await api.post('/users/bookmarks', {
-    osm_id: restaurant.osm_id,
+    geoapifyId: restaurant.geoapifyId,
     name: restaurant.name,
-    lat: restaurant.lat,
-    lon: restaurant.lon,
     cuisine: restaurant.cuisine || '',
   }, { headers: { Authorization: `Bearer ${accessToken}` } });
   return data;

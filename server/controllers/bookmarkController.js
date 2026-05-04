@@ -14,10 +14,10 @@ exports.getBookmarks = async (req, res) => {
 
 exports.addBookmark = async (req, res) => {
   try {
-    const { osmId, name, amenity, cuisine, lat, lon } = req.body;
+    const { geoapifyId, name, amenity, cuisine, lat, lon } = req.body;
 
-    if (!osmId || !name || typeof lat !== 'number' || typeof lon !== 'number') {
-      return res.status(400).json({ error: 'osmId, name, lat, lon are required' });
+    if (!geoapifyId || !name) {
+      return res.status(400).json({ error: true, message: 'geoapifyId and name are required' });
     }
 
     const user = await User.findByIdAndUpdate(
@@ -25,12 +25,12 @@ exports.addBookmark = async (req, res) => {
       {
         $addToSet: {
           bookmarks: {
-            osmId: String(osmId),
+            geoapifyId: String(geoapifyId),
             name,
             amenity: amenity || null,
             cuisine: cuisine || null,
-            lat,
-            lon,
+            lat: typeof lat === 'number' ? lat : undefined,
+            lon: typeof lon === 'number' ? lon : undefined,
             savedAt: new Date(),
           },
         },
@@ -52,7 +52,7 @@ exports.removeBookmark = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.user.userId,
-      { $pull: { bookmarks: { osmId: String(req.params.osmId) } } },
+      { $pull: { bookmarks: { geoapifyId: String(req.params.geoapifyId) } } },
       { new: true }
     ).select('bookmarks');
 

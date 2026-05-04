@@ -1,12 +1,12 @@
 import api from './api';
 
 /**
- * Fetch restaurants near a given coordinate from Overpass-backed API.
+ * Fetch restaurants near a given coordinate from Geoapify-backed API.
  * @param {number} lat - Latitude
  * @param {number} lng - Longitude
  * @param {number} radius - Radius in meters (default 2000)
  * @param {Object} filters - Additional filter params (cuisine, pureVeg, delivery, q)
- * @returns {Promise<Array>} Array of OSM restaurant objects
+ * @returns {Promise<Array>} Array of Geoapify restaurant objects
  */
 export async function fetchNearbyRestaurants(lat, lng, radius = 2000, filters = {}) {
   const params = {

@@ -10,9 +10,9 @@ const bookmarkSchema = new mongoose.Schema(
     },
 
     // ─── Embedded OSM data (no ObjectId reference) ──────────
-    osm_id: {
+    geoapifyId: {
       type: String,
-      required: [true, 'OSM ID is required'],
+      required: [true, 'Geoapify ID is required'],
     },
 
     name: {
@@ -47,7 +47,7 @@ const bookmarkSchema = new mongoose.Schema(
   }
 );
 
-// One bookmark per user per OSM place
-bookmarkSchema.index({ user: 1, osm_id: 1 }, { unique: true });
+// One bookmark per user per Geoapify place
+bookmarkSchema.index({ user: 1, geoapifyId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Bookmark', bookmarkSchema);

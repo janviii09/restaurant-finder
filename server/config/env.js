@@ -8,6 +8,7 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const requiredVars = [
   'MONGODB_URI',
   'JWT_SECRET',
+  'GEOAPIFY_API_KEY',
 ];
 
 const missing = requiredVars.filter((key) => {
@@ -34,5 +35,5 @@ module.exports = {
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL || '',
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN || '',
-  OVERPASS_API_URL: process.env.OVERPASS_API_URL || 'https://overpass-api.de/api/interpreter',
+  GEOAPIFY_API_KEY: process.env.GEOAPIFY_API_KEY,
 };

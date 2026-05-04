@@ -3,12 +3,12 @@ const bcrypt = require('bcryptjs');
 
 const bookmarkSchema = new mongoose.Schema(
   {
-    osmId: { type: String, required: true },
+    geoapifyId: { type: String, required: true },
     name: { type: String, required: true, trim: true },
     amenity: { type: String, default: null },
     cuisine: { type: String, default: null },
-    lat: { type: Number, required: true },
-    lon: { type: Number, required: true },
+    lat: { type: Number, required: false },
+    lon: { type: Number, required: false },
     savedAt: { type: Date, default: Date.now },
   },
   { _id: false }
@@ -76,7 +76,6 @@ const userSchema = new mongoose.Schema(
 );
 
 // ─── Indexes ─────────────────────────────────────────────────────
-userSchema.index({ email: 1 });
 
 // ─── Instance methods ────────────────────────────────────────────
 userSchema.methods.comparePassword = async function (candidatePassword) {

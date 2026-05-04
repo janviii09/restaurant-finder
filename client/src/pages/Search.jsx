@@ -1,37 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { CAMPUSES, useLocation } from '../context/LocationContext';
+import RestaurantCard from '../components/search/RestaurantCard';
 
 const API_BASE_URL =
   import.meta.env.REACT_APP_API_URL ||
   import.meta.env.VITE_API_URL ||
   'http://localhost:5000';
 
-const RADIUS_MIN = 2000;
-const RADIUS_MAX = 15000;
+const RADIUS_MIN = 1000;
+const RADIUS_MAX = 5000;
 const RADIUS_STEP = 500;
 const RADIUS_DEFAULT = 3000;
 
 function formatRadius(value) {
   if (value < 1000) return `${value}m`;
   return `${(value / 1000).toFixed(1)} km`;
-}
-
-function amenityLabel(amenity) {
-  if (amenity === 'cafe') return 'Cafe';
-  if (amenity === 'fast_food') return 'Fast Food';
-  if (amenity === 'food_court') return 'Food Court';
-  return 'Restaurant';
-}
-
-function websiteDomain(url) {
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    return parsed.hostname.replace(/^www\./, '');
-  } catch {
-    return url;
-  }
 }
 
 function CampusSelector({ onSelect }) {
@@ -49,52 +33,6 @@ function CampusSelector({ onSelect }) {
           </p>
         </button>
       ))}
-    </div>
-  );
-}
-
-function RestaurantCard({ item, bookmarked, onToggle, pending }) {
-  const domain = websiteDomain(item.website);
-
-  return (
-    <div className="card p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="text-lg font-bold text-surface-900 dark:text-white truncate">{item.name}</h3>
-          <span className="inline-block mt-1 text-xs px-2 py-1 rounded-full bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-200">
-            {amenityLabel(item.amenity)}
-          </span>
-          {item.cuisine && (
-            <p className="text-sm text-surface-500 mt-2">{item.cuisine.replaceAll(';', ' · ')}</p>
-          )}
-          {item.opening_hours && (
-            <p className="text-sm text-surface-500 mt-1">Hours: {item.opening_hours}</p>
-          )}
-          {item.phone && (
-            <p className="text-sm mt-1">
-              <a className="text-brand-600 dark:text-brand-300 hover:underline" href={`tel:${item.phone}`}>
-                {item.phone}
-              </a>
-            </p>
-          )}
-          {item.website && (
-            <p className="text-sm mt-1">
-              <a className="text-brand-600 dark:text-brand-300 hover:underline" href={item.website} target="_blank" rel="noreferrer">
-                {domain}
-              </a>
-            </p>
-          )}
-        </div>
-
-        <button
-          disabled={pending}
-          onClick={() => onToggle(item)}
-          className="text-xl p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700"
-          aria-label={bookmarked ? 'Remove bookmark' : 'Save bookmark'}
-        >
-          {bookmarked ? '🔖' : '📑'}
-        </button>
-      </div>
     </div>
   );
 }
@@ -130,7 +68,8 @@ export default function Search() {
       );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || 'Failed to load restaurants');
+        const errMsg = body.message || (typeof body.error === 'string' ? body.error : 'Failed to load restaurants');
+        throw new Error(errMsg);
       }
       const data = await res.json();
       setRestaurants(Array.isArray(data) ? data : []);
@@ -158,7 +97,7 @@ export default function Search() {
         });
         const data = await res.json().catch(() => []);
         if (res.ok && Array.isArray(data)) {
-          setBookmarkedIds(new Set(data.map((b) => String(b.osmId))));
+          setBookmarkedIds(new Set(data.map((b) => String(b.geoapifyId))));
         }
       } catch {
         // no-op
@@ -168,7 +107,7 @@ export default function Search() {
   }, [token]);
 
   const toggleBookmark = async (item) => {
-    const id = String(item.osmId);
+    const id = String(item.geoapifyId);
     const wasBookmarked = bookmarkedIds.has(id);
     const next = new Set(bookmarkedIds);
 
@@ -192,12 +131,10 @@ export default function Search() {
           body: wasBookmarked
             ? undefined
             : JSON.stringify({
-                osmId: id,
+                geoapifyId: id,
                 name: item.name,
                 amenity: item.amenity,
                 cuisine: item.cuisine,
-                lat: item.lat,
-                lon: item.lon,
               }),
         }
       );
@@ -317,14 +254,14 @@ export default function Search() {
           {!loading && !error && restaurants.length > 0 && (
             <div className="space-y-3">
               {restaurants.map((item) => {
-                const id = String(item.osmId);
+                const id = String(item.geoapifyId);
                 return (
                   <RestaurantCard
-                    key={`${item.type}-${id}`}
-                    item={item}
+                    key={id}
+                    restaurant={item}
                     bookmarked={bookmarkedIds.has(id)}
-                    onToggle={toggleBookmark}
-                    pending={bookmarkPending === id}
+                    onToggleBookmark={toggleBookmark}
+                    showBookmarkButton={true}
                   />
                 );
               })}

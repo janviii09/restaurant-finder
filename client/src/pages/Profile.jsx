@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import RestaurantCard from '../components/search/RestaurantCard';
 
 const API_BASE_URL =
   import.meta.env.REACT_APP_API_URL ||
@@ -49,9 +50,9 @@ export default function Profile() {
     load();
   }, [token]);
 
-  const handleRemove = async (osmId) => {
+  const handleRemove = async (geoapifyId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/bookmarks/${encodeURIComponent(osmId)}`, {
+      const res = await fetch(`${API_BASE_URL}/api/bookmarks/${encodeURIComponent(geoapifyId)}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -98,31 +99,12 @@ export default function Profile() {
       {!loading && !error && bookmarks.length > 0 && (
         <div className="space-y-3">
           {bookmarks.map((b) => (
-            <div key={String(b.osmId)} className="card p-4 flex items-start justify-between gap-3">
-              <div>
-                <h2 className="font-bold text-surface-900 dark:text-white">{b.name}</h2>
-                {b.amenity && <p className="text-sm text-surface-500 mt-1">{b.amenity}</p>}
-                {b.cuisine && <p className="text-sm text-surface-500 mt-1">{b.cuisine.replaceAll(';', ' · ')}</p>}
-                {b.phone && (
-                  <p className="text-sm mt-1">
-                    <a href={`tel:${b.phone}`} className="text-brand-600 dark:text-brand-300 hover:underline">
-                      {b.phone}
-                    </a>
-                  </p>
-                )}
-                {b.website && (
-                  <p className="text-sm mt-1">
-                    <a href={b.website} target="_blank" rel="noreferrer" className="text-brand-600 dark:text-brand-300 hover:underline">
-                      {domainOnly(b.website)}
-                    </a>
-                  </p>
-                )}
-              </div>
-
-              <button onClick={() => handleRemove(String(b.osmId))} className="btn-secondary text-sm">
-                Remove
-              </button>
-            </div>
+            <RestaurantCard
+              key={String(b.geoapifyId)}
+              restaurant={b}
+              showBookmarkButton={false}
+              onRemove={() => handleRemove(String(b.geoapifyId))}
+            />
           ))}
         </div>
       )}
